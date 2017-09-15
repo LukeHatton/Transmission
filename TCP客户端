@@ -1,0 +1,33 @@
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.Scanner;
+
+public class TCP_Client {//发送文本数据
+	public static boolean send(OutputStream out,Scanner s){//向客户端输出流中写入数据
+		System.out.println("我要说...");
+		String str = s.nextLine();
+		try {
+			out.write(str.getBytes());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if(str.equals("ByeBye")){//输入ByeBye,结束线程
+			return false;
+		}else
+			return true;
+	}
+	
+	public static void main(String[] args) throws IOException {
+		Scanner s = new Scanner(System.in);
+		Socket socket = new Socket();
+		socket.connect(new InetSocketAddress(InetAddress.getLocalHost(), 8888), 10000);//设置连接超时为10000毫秒(10秒)
+		System.out.println("连接成功!");
+		while(send(socket.getOutputStream(), s));
+		socket.shutdownOutput();//告知服务器,发送完毕,可以结束线程了
+		socket.close();
+	}
+}
