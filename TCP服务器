@@ -1,0 +1,54 @@
+
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class TCP_Server {//接收多线程发送的文本数据
+	public static void showAccess(Socket socket){
+		String name = socket.getInetAddress().getHostName();
+		String ip = socket.getLocalAddress().getHostAddress();
+		System.out.println("ip为"+ip+"的主机"+name+"连接成功! ");
+	}
+	
+	@SuppressWarnings("resource")
+	public static void main(String[] args) throws IOException {
+		ServerSocket server = new ServerSocket(8888);
+		while(true){
+			System.out.println("等待客户端连接...");
+			Socket socket = server.accept();
+			showAccess(socket);
+			new Thread(new Task1(socket.getInputStream(),socket)).start();
+		}
+	}
+}
+
+class Task1 implements Runnable{//实现服务器主要功能的可执行任务
+	private InputStream in;
+	private Socket socket;
+	public Task1() {
+		// TODO Auto-generated constructor stub
+	}
+	public Task1(InputStream in,Socket socket){
+		this.in = in;
+		this.socket = socket;
+	}
+	public void showHost(Socket socket){
+		String name = socket.getInetAddress().getHostName();
+		String ip = socket.getLocalAddress().getHostAddress();
+		System.out.print("ip为"+ip+"的主机"+name+"说:  ");
+	}
+	public void run() {
+		byte[] b = new byte[1024*20];
+		int len;
+		try {
+			while((len = in.read(b))!=-1){
+				this.showHost(socket);
+				System.out.println(new String(b,0,len));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+}
